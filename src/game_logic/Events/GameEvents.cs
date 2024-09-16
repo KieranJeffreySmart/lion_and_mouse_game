@@ -36,7 +36,7 @@ namespace Lion_and_mouse.src.Events
 
         public int ActionType { get; } = actionType;
 
-        internal GameCharacterTypes CharacterType { get; } = characterType;
+        public GameCharacterTypes CharacterType { get; } = characterType;
     }
 
     public class NewStoryEvent(LionStates lionStartingState) : IGameEvent 

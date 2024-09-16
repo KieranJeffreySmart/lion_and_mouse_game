@@ -12,46 +12,46 @@ namespace Lion_and_mouse.src.MouseContext
 
         public bool FoodStoreIsEmpty => mouse?.FoodStoreCount < 1;
 
-        internal void GoHome()
+        public void GoHome()
         {
             mouse = mouse.SetState(MouseStates.AtHome);
         }
 
-        internal void Eaten()
+        public void Eaten()
         {
             mouse = mouse.SetState(MouseStates.Dead);
             eventBroker.Publish(new MouseDiedEvent());
         }
 
-        internal void EndDay(int currentDay)
+        public void EndDay(int currentDay)
         {
             mouse = mouse.UpdateFoodStore(-1);
             eventBroker.Publish(new MouseDayEndedEvent(currentDay, mouse.FoodStoreCount));
         }
 
-        internal void IncrementFoodStore(int foodGathered)
+        public void IncrementFoodStore(int foodGathered)
         {
             mouse = mouse.UpdateFoodStore(foodGathered);
         }
 
-        internal void Starve()
+        public void Starve()
         {
             mouse = mouse.SetState(MouseStates.Dead);
             eventBroker.Publish(new MouseDiedEvent());
         }
 
-        internal void NewMouse()
+        public void NewMouse()
         {
             mouse = new(MouseStates.AtHome, 2);
         }
 
-        internal void Hunt()
+        public void Hunt()
         {
             mouse = mouse.SetState(MouseStates.Hunting);
             eventBroker.Publish(new ActionTakenEvent((int)MouseActionTypes.Hunt, GameCharacterTypes.Mouse));
         }
 
-        internal void StayAtHome()
+        public void StayAtHome()
         {
             mouse = mouse.SetState(MouseStates.AtHome);
             eventBroker.Publish(new ActionTakenEvent((int)MouseActionTypes.StayAtHome, GameCharacterTypes.Mouse));

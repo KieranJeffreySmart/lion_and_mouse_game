@@ -16,7 +16,7 @@ namespace Lion_and_mouse.src.StoryContext
             eventBroker.Publish(new NewStoryEvent(lionStartingState));
         }
 
-        internal void EndDay()
+        public void EndDay()
         {
             var mouseAction = actions.FirstOrDefault(a => a.CharacterType == GameCharacterTypes.Mouse && a.Day == currentStory?.CurrentDay);
             var lionAction = actions.FirstOrDefault(a => a.CharacterType == GameCharacterTypes.Lion && a.Day == currentStory?.CurrentDay);
@@ -62,7 +62,7 @@ namespace Lion_and_mouse.src.StoryContext
             return result >= 50;
         }
 
-        internal void TrackCharacterAction(GameCharacterTypes characterType, int actionType)
+        public void TrackCharacterAction(GameCharacterTypes characterType, int actionType)
         {
             if (actions.FirstOrDefault(a => a.CharacterType == characterType && a.Day == currentStory?.CurrentDay) == null)
             {
@@ -70,13 +70,13 @@ namespace Lion_and_mouse.src.StoryContext
             }
         }
 
-        internal bool AllActionsMade()
+        public bool AllActionsMade()
         {
             var sortedActions = actions.Where(a => a.Day == currentStory?.CurrentDay).OrderBy(a => a.SequenceNumber);
             return sortedActions.Any(a => a.CharacterType == GameCharacterTypes.Lion) && sortedActions.Any(a => a.CharacterType == GameCharacterTypes.Mouse);
         }
 
-        internal GameCharacterTypes GetLastActionCharacterType()
+        public GameCharacterTypes GetLastActionCharacterType()
         {
             var sortedActions = actions.OrderBy(a => a.SequenceNumber).ToList();
 

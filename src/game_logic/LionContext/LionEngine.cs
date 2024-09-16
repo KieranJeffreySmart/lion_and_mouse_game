@@ -9,22 +9,22 @@ namespace Lion_and_mouse.src.LionContext
         public bool IsHunting => lion?.State == LionStates.Hunting;
         public bool IsSleeping => lion?.State == LionStates.Sleeping;
 
-        internal void GoHome()
+        public void GoHome()
         {
             lion = Lion.SetState(LionStates.AtHome);
         }
 
-        internal void Hunt()
+        public void Hunt()
         {
             lion = Lion.SetState(LionStates.Hunting);
         }
 
-        internal void NewLion(LionStates lionStartingState)
+        public void NewLion(LionStates lionStartingState)
         {
             lion = new(lionStartingState);
         }
 
-        internal void Sleep()
+        public void Sleep()
         {
             lion = Lion.SetState(LionStates.Sleeping);
         }

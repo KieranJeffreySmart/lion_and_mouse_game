@@ -6,7 +6,7 @@ namespace Lion_and_mouse.src.StoryContext
     {
         public int CurrentDay = currentDay;
 
-        internal Story IncrementDay()
+        public Story IncrementDay()
         {
             return new Story(CurrentDay+1);
         }

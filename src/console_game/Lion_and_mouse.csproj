@@ -13,4 +13,8 @@
     <PackageReference Include="Silk.NET.Windowing" Version="2.21.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\game_logic\lion_and_mouse_game.csproj" />
+  </ItemGroup>
+
 </Project>

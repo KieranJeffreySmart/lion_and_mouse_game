@@ -20,7 +20,7 @@ namespace Lion_and_mouse.src.GameContext
             loadedGame = loadedGame?.LoseGame();            
         }
 
-        internal void WinGame(int foodStored)
+        public void WinGame(int foodStored)
         {
             loadedGame = loadedGame?.WinGame(foodStored*2, CalculateAccolade(foodStored));  
         }

@@ -27,7 +27,7 @@ window.Render += OnRender;
 
 void OnRender(double timeDelta)
 {
-    throw new NotImplementedException();
+    //
 }
 
 void OnLoad()
