@@ -15,6 +15,8 @@ GameEngine gameEngine = new(broker);
 StoryEngine storyEngine = new(broker);
 MouseEngine mouseEngine = new(broker);
 LionEngine lionEngine = new();
+
+
 WindowOptions options = WindowOptions.Default with
 {
     Size = new Vector2D<int>(800, 600),
@@ -52,7 +54,7 @@ void OnLoad()
 void KeyDown(IKeyboard keyboard, Key key, int arg3)
 {
     if (key == Key.Q) window.Close();    
-    if (!gameEngine.IsGameRunning && key == Key.N) { gameEngine.New(); }
+    if (!gameEngine.IsGameRunning && key == Key.N) { gameEngine.New(Guid.NewGuid()); }
     if (gameEngine.IsGameRunning && key == Key.H) { mouseEngine.Hunt(); }
     if (gameEngine.IsGameRunning && key == Key.S) { mouseEngine.StayAtHome(); }
 }

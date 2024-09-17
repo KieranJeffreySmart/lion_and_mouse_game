@@ -8,7 +8,7 @@ namespace Lion_and_mouse.src.StoryContext
     {
         private readonly IEventPub eventBroker = eventBroker;
         Story? currentStory = null;
-        private readonly List<Action> actions = [];
+        private readonly List<PlayerAction> actions = [];
         
         public void NewStory(LionStates lionStartingState)
         {
@@ -23,34 +23,51 @@ namespace Lion_and_mouse.src.StoryContext
 
             if (mouseAction != null && lionAction != null && currentStory != null)
             {
+                IGameEvent? gameEvent = null;
+                var newParagraph = string.Empty;
                 if (mouseAction.ActionType == (int)MouseActionTypes.Hunt)
                 {
                     if (lionAction.ActionType == (int)LionActionTypes.Hunt)
                     {
                         if(FiftyFiftyTest())
                         {
-                            eventBroker.Publish(new MouseEatenEvent());
+                            gameEvent = new MouseEatenEvent();
+                            newParagraph = $"while searching for something to eat the mouse was eaten by a lion";
+                        }
+                        else
+                        {
+                            gameEvent = new MouseReturnedHomeEvent(1);
+                            newParagraph = $"while searching for something to eat the mouse avoided being eaten by a lion and returned home with 1 food";
                         }
                     }
 
                     if (lionAction.ActionType == (int)LionActionTypes.Sleep)
                     {
                         // TODO: Implement encounter logic
-                        this.eventBroker.Publish(new MouseReturnedHomeEvent(1));
+                        gameEvent = new MouseReturnedHomeEvent(1);
+                        newParagraph = $"while searching for something to eat the mouse found a sleeping lion and in her haste returned home with only 1 food";
                     }
 
                     if (lionAction.ActionType == (int)LionActionTypes.StayAtHome)
                     {
-                        this.eventBroker.Publish(new MouseReturnedHomeEvent(2));
+                        gameEvent = new MouseReturnedHomeEvent(2);
+                        newParagraph = $"after searching for something to eat the mouse returned home with 2 food";
                     }
                 }
                 else
                 {
-                    eventBroker.Publish(new MouseStayedHomeEvent());
+                    gameEvent = new MouseStayedHomeEvent();
+                    newParagraph = $"the mouse stayed at home";
+                }
+
+                if (!(gameEvent is null))
+                {
+                    eventBroker.Publish(gameEvent);
+                    currentStory.AddParagraph($"On day {currentStory.CurrentDay}, {newParagraph}");
                 }
 
                 currentStory = currentStory.IncrementDay();
-                eventBroker.Publish(new DayEndedEvent(this.currentStory.CurrentDay));
+                eventBroker.Publish(new DayEndedEvent(this.currentStory.CurrentDay, currentStory.Text));
             }
         }
 
@@ -66,7 +83,7 @@ namespace Lion_and_mouse.src.StoryContext
         {
             if (actions.FirstOrDefault(a => a.CharacterType == characterType && a.Day == currentStory?.CurrentDay) == null)
             {
-                actions.Add(new Action(characterType, actionType, currentStory?.CurrentDay ?? 0, actions.Count+1));
+                actions.Add(new PlayerAction(characterType, actionType, currentStory?.CurrentDay ?? 0, actions.Count+1));
             }
         }
 
@@ -82,9 +99,29 @@ namespace Lion_and_mouse.src.StoryContext
 
             return sortedActions.Last().CharacterType;
         }
+
+        public StoryData GetStory()
+        {
+            return currentStory is null 
+                ? new StoryData {} 
+                : new StoryData { 
+                    Id = currentStory.Id.ToString(), 
+                    CurrentDay = currentStory.CurrentDay, 
+                    StoryText = currentStory.Text
+                };
+        }
     }
 
-    public class Action(GameCharacterTypes characterType, int actionType, int day, int sequenceNumber)
+    
+    [Serializable]
+    public class StoryData
+    {
+        public string Id { get; set; } = string.Empty;
+        public string StoryText { get; set; } = string.Empty;
+        public int CurrentDay { get; set; } = 0;
+    }
+
+    public class PlayerAction(GameCharacterTypes characterType, int actionType, int day, int sequenceNumber)
     {
         public GameCharacterTypes CharacterType { get; } = characterType;
 

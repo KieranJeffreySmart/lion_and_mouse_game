@@ -1,5 +1,24 @@
 namespace Lion_and_mouse.src.Events
 {
+    public class WebSocketGameEventBroadcaster : IEventPub
+    {
+        private IEventPub innerPublisher;
+        private Action<IGameEvent> pushEvent;
+
+        public WebSocketGameEventBroadcaster(IEventPub innerPublisher, Action<IGameEvent> pushEvent)
+        {
+            this.innerPublisher = innerPublisher;
+            this.pushEvent = pushEvent;
+        }
+
+        void IEventPub.Publish<T>(T gameEvent)
+        {
+            innerPublisher.Publish(gameEvent);
+            pushEvent(gameEvent);
+        }
+    }
+
+
     public class GameEventMediator : IEventPub, IEventSub
     {
         private readonly Dictionary<Type, List<Action<IGameEvent>>> subs = new Dictionary<Type, List<Action<IGameEvent>>>();

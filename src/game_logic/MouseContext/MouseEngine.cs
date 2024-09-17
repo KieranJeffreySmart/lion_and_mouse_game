@@ -26,6 +26,7 @@ namespace Lion_and_mouse.src.MouseContext
         public void EndDay(int currentDay)
         {
             mouse = mouse.UpdateFoodStore(-1);
+            mouse.SetState(MouseStates.AtHome);
             eventBroker.Publish(new MouseDayEndedEvent(currentDay, mouse.FoodStoreCount));
         }
 
@@ -56,5 +57,19 @@ namespace Lion_and_mouse.src.MouseContext
             mouse = mouse.SetState(MouseStates.AtHome);
             eventBroker.Publish(new ActionTakenEvent((int)MouseActionTypes.StayAtHome, GameCharacterTypes.Mouse));
         }
+
+        public MouseData GetMouse()
+        {
+            return new MouseData { State = mouse.State.ToString(), Food = mouse.FoodStoreCount};
+        }
     }
+
+    
+    [Serializable]
+    public class MouseData
+    {
+        public string State { get; set; } = string.Empty;
+        public int Food { get; set; } = -1;
+    }
+
 }

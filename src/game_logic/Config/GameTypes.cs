@@ -33,9 +33,10 @@ public enum LionStates
 
 public enum Accolades
 {
+    None,
     Survivor,
     Hoarder,
-    Desperate
+    Desperado
 }
 
 public enum GameStates
