@@ -1,6 +1,6 @@
-using Lion_and_mouse.src.Events;
+using lion_and_mouse_game.Events;
 
-namespace Lion_and_mouse.src.LionContext
+namespace lion_and_mouse_game.LionContext
 {
     public class LionPolicies
     {
@@ -9,11 +9,11 @@ namespace Lion_and_mouse.src.LionContext
             lionEngine.NewLion(gameEvent.LionStartingState);
         }
 
-        public static void IfDayEnded(LionEngine lionEngine, DayEndedEvent gameEvent)
+        public static void IfNewDay(LionEngine lionEngine, NewDayEvent gameEvent)
         {
             if (lionEngine.IsAtHome) lionEngine.Hunt();
-            if (lionEngine.IsHunting) lionEngine.Sleep();
-            if (lionEngine.IsSleeping) lionEngine.GoHome();
+            else if (lionEngine.IsHunting) lionEngine.Sleep();
+            else if (lionEngine.IsSleeping) lionEngine.GoHome();
         }
     }
 }

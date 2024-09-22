@@ -1,4 +1,4 @@
-namespace Lion_and_mouse.src.Events
+namespace lion_and_mouse_game.Events
 {
     public class WebSocketGameEventBroadcaster : IEventPub
     {
@@ -34,13 +34,13 @@ namespace Lion_and_mouse.src.Events
         public void Subscribe<T>(IGameEventHandler<T> handler) where T : IGameEvent
         {
             var type = typeof(T);
-            if (this.subs.TryGetValue(type, out List<Action<IGameEvent>>? handlers))
+            if (subs.TryGetValue(type, out List<Action<IGameEvent>>? handlers))
             {
                 handlers.Add(handler.Handle);
             }
             else
             {
-                this.subs[type] = new List<Action<IGameEvent>> { handler.Handle };
+                subs[type] = new List<Action<IGameEvent>> { handler.Handle };
             }
         }
     }

@@ -1,6 +1,4 @@
-
-
-namespace Lion_and_mouse.src.MouseContext
+namespace lion_and_mouse_game.MouseContext
 {
     public class Mouse(MouseStates state, int foodStoreCount)
     {
@@ -10,12 +8,12 @@ namespace Lion_and_mouse.src.MouseContext
 
         public Mouse SetState(MouseStates newState)
         {
-            return new Mouse(newState, this.FoodStoreCount);
+            return new Mouse(newState, FoodStoreCount);
         }
 
         public Mouse UpdateFoodStore(int delta)
         {
-            return new Mouse(State, this.FoodStoreCount + delta);
+            return new Mouse(State, FoodStoreCount + delta);
         }
     }
 }

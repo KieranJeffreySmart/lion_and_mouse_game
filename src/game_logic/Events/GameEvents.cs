@@ -1,4 +1,4 @@
-namespace Lion_and_mouse.src.Events
+namespace lion_and_mouse_game.Events
 {
     public interface IGameEvent
     {
@@ -21,17 +21,24 @@ namespace Lion_and_mouse.src.Events
         public int CurrentDay { get; } = currentDay;
         public string StoryText { get; } = storyText;
     }
-    
+
     public class MouseDayEndedEvent(int currentDay, int foodStored) : IGameEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name => nameof(MouseDayEndedEvent);
-        public int CurrentDay { get; } = currentDay;        
+        public int CurrentDay { get; } = currentDay;
         public int FoodStored { get; } = foodStored;
 
     }
 
-    public class MouseDiedEvent : IGameEvent 
+    public class NewDayEvent(int currentDay) : IGameEvent
+    {
+        public Guid Id { get; } = Guid.NewGuid();
+        public string Name => nameof(DayEndedEvent);
+        public int CurrentDay { get; } = currentDay;
+    }
+
+    public class MouseDiedEvent : IGameEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name => nameof(MouseDiedEvent);
@@ -47,7 +54,7 @@ namespace Lion_and_mouse.src.Events
         public GameCharacterTypes CharacterType { get; } = characterType;
     }
 
-    public class NewStoryEvent(LionStates lionStartingState) : IGameEvent 
+    public class NewStoryEvent(LionStates lionStartingState) : IGameEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name => nameof(NewStoryEvent);
@@ -61,25 +68,25 @@ namespace Lion_and_mouse.src.Events
         public int FoodGathered { get; } = foodGathered;
     }
 
-    public class MouseEatenEvent : IGameEvent 
+    public class MouseEatenEvent : IGameEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name => nameof(MouseEatenEvent);
     }
 
-    public class MouseStayedHomeEvent : IGameEvent 
+    public class MouseStayedHomeEvent : IGameEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name => nameof(MouseStayedHomeEvent);
     }
-    
-    public class MouseFoodStoreChanged : IGameEvent 
+
+    public class MouseFoodStoreChanged : IGameEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name => nameof(MouseFoodStoreChanged);
     }
-    
-    public class GameWon : IGameEvent 
+
+    public class GameWon : IGameEvent
     {
         public GameWon(int foodStored, Accolades accolade)
         {
@@ -92,8 +99,8 @@ namespace Lion_and_mouse.src.Events
         public int FoodStored { get; }
         public Accolades Accolade { get; }
     }
-    
-    public class GameLost : IGameEvent 
+
+    public class GameLost : IGameEvent
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name => nameof(GameLost);

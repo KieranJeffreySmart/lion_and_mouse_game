@@ -1,9 +1,6 @@
+using lion_and_mouse_game.Events;
 
-
-
-using Lion_and_mouse.src.Events;
-
-namespace Lion_and_mouse.src.MouseContext
+namespace lion_and_mouse_game.MouseContext
 {
     public class MouseEngine(IEventPub eventBroker)
     {
@@ -25,13 +22,13 @@ namespace Lion_and_mouse.src.MouseContext
 
         public void EndDay(int currentDay)
         {
-            mouse = mouse.UpdateFoodStore(-1);
-            mouse.SetState(MouseStates.AtHome);
+            mouse = mouse.SetState(MouseStates.AtHome).UpdateFoodStore(-1);
             eventBroker.Publish(new MouseDayEndedEvent(currentDay, mouse.FoodStoreCount));
         }
 
         public void IncrementFoodStore(int foodGathered)
         {
+            Console.WriteLine($"Gathered {foodGathered} food");
             mouse = mouse.UpdateFoodStore(foodGathered);
         }
 
@@ -60,11 +57,11 @@ namespace Lion_and_mouse.src.MouseContext
 
         public MouseData GetMouse()
         {
-            return new MouseData { State = mouse.State.ToString(), Food = mouse.FoodStoreCount};
+            return new MouseData { State = mouse.State.ToString(), Food = mouse.FoodStoreCount };
         }
     }
 
-    
+
     [Serializable]
     public class MouseData
     {

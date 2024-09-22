@@ -1,10 +1,10 @@
 using System.Text.Json;
 using Fleck;
-using Lion_and_mouse.src.Events;
-using Lion_and_mouse.src.GameContext;
-using Lion_and_mouse.src.LionContext;
-using Lion_and_mouse.src.MouseContext;
-using Lion_and_mouse.src.StoryContext;
+using lion_and_mouse_game.Events;
+using lion_and_mouse_game.GameContext;
+using lion_and_mouse_game.LionContext;
+using lion_and_mouse_game.MouseContext;
+using lion_and_mouse_game.StoryContext;
 
 
 internal class Program
@@ -28,7 +28,7 @@ internal class Program
         broker.Subscribe(new GameEventHandler<MouseReturnedHomeEvent>((gameEvent) => MousePolicies.IfMouseReturned(mouseEngine, gameEvent)));
         broker.Subscribe(new GameEventHandler<MouseEatenEvent>((gameEvent) => MousePolicies.IfEaten(mouseEngine, gameEvent)));
         broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => LionPolicies.IfNewStory(lionEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => LionPolicies.IfDayEnded(lionEngine, gameEvent)));
+        broker.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
 
         var builder = WebApplication.CreateBuilder(args);
 

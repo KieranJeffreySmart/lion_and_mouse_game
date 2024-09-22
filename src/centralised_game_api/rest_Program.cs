@@ -1,8 +1,8 @@
-using Lion_and_mouse.src.Events;
-using Lion_and_mouse.src.GameContext;
-using Lion_and_mouse.src.LionContext;
-using Lion_and_mouse.src.MouseContext;
-using Lion_and_mouse.src.StoryContext;
+using lion_and_mouse_game.Events;
+using lion_and_mouse_game.GameContext;
+using lion_and_mouse_game.LionContext;
+using lion_and_mouse_game.MouseContext;
+using lion_and_mouse_game.StoryContext;
 
 internal class rest_Program
 {

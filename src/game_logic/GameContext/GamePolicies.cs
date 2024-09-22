@@ -1,6 +1,6 @@
-using Lion_and_mouse.src.Events;
+using lion_and_mouse_game.Events;
 
-namespace Lion_and_mouse.src.GameContext
+namespace lion_and_mouse_game.GameContext
 {
     public class GamePolicies
     {
@@ -11,7 +11,7 @@ namespace Lion_and_mouse.src.GameContext
 
         public static void IfMouseDayEnded(GameEngine gameEngine, MouseDayEndedEvent gameEvent)
         {
-            if (gameEvent.CurrentDay > 7)
+            if (gameEvent.CurrentDay >= 7)
             {
                 gameEngine.WinGame(gameEvent.FoodStored);
             }

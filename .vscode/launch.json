@@ -11,10 +11,10 @@
             "type": "node-terminal"
         },
         {
-            "name": "C#: <project-name> Debug",
+            "name": "C#: console_client Debug",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/<relative-path-to-project-folder><project-name>.csproj"
+            "projectPath": "${workspaceFolder}/src/console_client/console_client.csproj"
         }
 
     ]

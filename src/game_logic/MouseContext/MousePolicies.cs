@@ -1,6 +1,6 @@
-using Lion_and_mouse.src.Events;
+using lion_and_mouse_game.Events;
 
-namespace Lion_and_mouse.src.MouseContext
+namespace lion_and_mouse_game.MouseContext
 {
     public class MousePolicies
     {
@@ -22,14 +22,8 @@ namespace Lion_and_mouse.src.MouseContext
 
         public static void IfDayEnded(MouseEngine mouseEngine, DayEndedEvent gameEvent)
         {
-            if (mouseEngine.FoodStoreIsEmpty)
-            {
-                mouseEngine.Starve();
-            }
-            else
-            {
-                mouseEngine.EndDay(gameEvent.CurrentDay);
-            }
+            if (mouseEngine.FoodStoreIsEmpty) mouseEngine.Starve(); 
+            else mouseEngine.EndDay(gameEvent.CurrentDay);
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace Lion_and_mouse.src.Events
+namespace lion_and_mouse_game.Events
 {
     public class GameEventHandler<T> : IGameEventHandler<T> where T : IGameEvent
     {

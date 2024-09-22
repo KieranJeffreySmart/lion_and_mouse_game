@@ -1,11 +1,6 @@
-using System.Collections.Concurrent;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Reflection.PortableExecutable;
-using Lion_and_mouse.src.Events;
-using System.Linq;
+using lion_and_mouse_game.Events;
 
-namespace Lion_and_mouse.src.StoryContext
+namespace lion_and_mouse_game.StoryContext
 {
     public class StoryPolicies
     {
@@ -14,7 +9,7 @@ namespace Lion_and_mouse.src.StoryContext
             storyEngine.TrackCharacterAction(gameEvent.CharacterType, gameEvent.ActionType);
 
             if (storyEngine.AllActionsMade() && storyEngine.GetLastActionCharacterType() == gameEvent.CharacterType)
-                storyEngine.EndDay();    
+                storyEngine.EndDay();
         }
 
         public static void IfNewGame(StoryEngine storyEngine, NewGameStartedEvent gameEvent)

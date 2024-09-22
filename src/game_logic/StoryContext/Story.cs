@@ -1,23 +1,21 @@
-
-
-namespace Lion_and_mouse.src.StoryContext
+namespace lion_and_mouse_game.StoryContext
 {
-    public class Story(int currentDay)
+    public class Story(int currentDay, IEnumerable<string>? paragraphs = null)
     {
-        public Guid Id  { get; } = Guid.NewGuid();
+        public Guid Id { get; } = Guid.NewGuid();
         public int CurrentDay = currentDay;
-        private List<string> paragraphs = new List<string>();
+        private List<string> Paragraphs = paragraphs?.ToList() ?? new List<string>();
 
-        public string Text => String.Join("\r\n\r\n", paragraphs);
+        public string Text => string.Join("\r\n\r\n", Paragraphs);
 
         public Story IncrementDay()
         {
-            return new Story(CurrentDay+1);
+            return new Story(CurrentDay + 1, Paragraphs);
         }
 
-        public void AddParagraph(string text)
+        public Story AddParagraph(string text)
         {
-            this.paragraphs.Add(text);
+            return new Story(CurrentDay, Paragraphs.Union([text]));
         }
     }
 }
