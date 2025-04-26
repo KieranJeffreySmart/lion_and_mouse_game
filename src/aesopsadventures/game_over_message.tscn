@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3 uid="uid://85xwgskcuxun"]
+
+[ext_resource type="Script" path="res://GameOverMessage.cs" id="1_x8dwc"]
+
+[node name="GameOverMessage" type="Node2D"]
+position = Vector2(1, 6)
+script = ExtResource("1_x8dwc")
+
+[node name="Label" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 400.0
+offset_top = 164.0
+offset_right = 748.0
+offset_bottom = 248.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.654902, 0.188235, 0, 1)
+theme_override_font_sizes/font_size = 61
+text = "Game Over!"
+
+[node name="Button" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 503.0
+offset_top = 279.0
+offset_right = 646.0
+offset_bottom = 336.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 4
+text = "Retry"
+script = ExtResource("1_x8dwc")
+
+[node name="Button2" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 502.0
+offset_top = 356.0
+offset_right = 645.0
+offset_bottom = 413.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 4
+text = "Exit"
+
+[connection signal="pressed" from="Button" to="." method="Retry"]
+[connection signal="pressed" from="Button2" to="." method="Quit"]

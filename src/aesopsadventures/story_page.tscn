@@ -1,0 +1,64 @@
+[gd_scene load_steps=2 format=3 uid="uid://8pcf3nmdl8fd"]
+
+[ext_resource type="Script" path="res://StoryPage.cs" id="1_1q26a"]
+
+[node name="StoryPage" type="Node2D"]
+script = ExtResource("1_1q26a")
+
+[node name="MouseDataLbl" type="Label" parent="."]
+offset_right = 173.0
+offset_bottom = 87.0
+text = "Mouse
+State:
+Food:"
+
+[node name="StoryDataLbl" type="Label" parent="."]
+offset_left = 974.0
+offset_top = 2.0
+offset_right = 1147.0
+offset_bottom = 47.0
+text = "Day:"
+
+[node name="StoryTextLbl" type="RichTextLabel" parent="."]
+offset_left = 224.0
+offset_top = 12.0
+offset_right = 940.0
+offset_bottom = 295.0
+scale = Vector2(0.973515, 1.27911)
+theme_override_font_sizes/bold_italics_font_size = 14
+theme_override_font_sizes/italics_font_size = 14
+theme_override_font_sizes/mono_font_size = 14
+theme_override_font_sizes/normal_font_size = 14
+theme_override_font_sizes/bold_font_size = 14
+text = "The story so far..."
+
+[node name="LionDataLbl" type="Label" parent="."]
+offset_left = 9.0
+offset_top = 563.0
+offset_right = 182.0
+offset_bottom = 633.0
+text = "Lion
+State:"
+
+[node name="ResetBtn" type="Button" parent="."]
+offset_left = 980.0
+offset_top = 149.0
+offset_right = 1131.0
+offset_bottom = 190.0
+text = "Reset"
+
+[node name="QuitBtn" type="Button" parent="."]
+offset_left = 980.0
+offset_top = 205.0
+offset_right = 1131.0
+offset_bottom = 246.0
+text = "Quit"
+
+[node name="OptionBtnsList" type="VFlowContainer" parent="."]
+offset_left = 7.0
+offset_top = 116.0
+offset_right = 204.0
+offset_bottom = 533.0
+
+[connection signal="pressed" from="ResetBtn" to="." method="Restart"]
+[connection signal="pressed" from="QuitBtn" to="." method="Quit"]
