@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "C#: Central Server Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/src/centralised_game_api/centralised_game_api.csproj"
+        },
+        {
             "command": "npm start",
             "name": "Run npm start",
             "request": "launch",
