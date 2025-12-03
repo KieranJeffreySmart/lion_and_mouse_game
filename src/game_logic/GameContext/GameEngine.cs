@@ -33,7 +33,7 @@ namespace lion_and_mouse_game.GameContext
         private static Accolades CalculateAccolade(int foodStored)
         {
             if (foodStored < 5) return Accolades.Desperado;
-            else if (foodStored > 10) return Accolades.Hoarder;
+            else if (foodStored >= 10) return Accolades.Hoarder;
 
             return Accolades.Survivor;
         }

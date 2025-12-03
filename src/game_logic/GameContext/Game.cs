@@ -4,7 +4,6 @@ namespace lion_and_mouse_game.GameContext
 {
     public class Game(GameStates state, Guid playerId)
     {
-
         private Game(GameStates state, Guid playerId, int finishingFood, Accolades accolade) : this(state, playerId)
         {
             FinishingFood = finishingFood;
