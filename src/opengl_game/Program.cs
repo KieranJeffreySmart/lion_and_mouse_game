@@ -14,7 +14,7 @@ GameEventMediator broker = new();
 GameEngine gameEngine = new(broker);
 StoryEngine storyEngine = new(broker);
 MouseEngine mouseEngine = new(broker);
-LionEngine lionEngine = new();
+LionEngine lionEngine = new(broker);
 
 
 WindowOptions options = WindowOptions.Default with
@@ -48,7 +48,7 @@ void OnLoad()
     broker.Subscribe(new GameEventHandler<MouseReturnedHomeEvent>((gameEvent) => MousePolicies.IfMouseReturned(mouseEngine, gameEvent)));
     broker.Subscribe(new GameEventHandler<MouseEatenEvent>((gameEvent) => MousePolicies.IfEaten(mouseEngine, gameEvent)));
     broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => LionPolicies.IfNewStory(lionEngine, gameEvent)));
-    broker.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
+    broker.Subscribe(new GameEventHandler<NewDayEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
 }
 
 void KeyDown(IKeyboard keyboard, Key key, int arg3)

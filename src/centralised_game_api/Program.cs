@@ -1,9 +1,11 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Fleck;
 using lion_and_mouse_game.Events;
 using lion_and_mouse_game.GameContext;
 using lion_and_mouse_game.LionContext;
 using lion_and_mouse_game.MouseContext;
+using lion_and_mouse_game.PlayerContext;
 using lion_and_mouse_game.StoryContext;
 
 
@@ -17,7 +19,7 @@ internal class Program
         GameEngine gameEngine = new(broadcaster);
         StoryEngine storyEngine = new(broadcaster);
         MouseEngine mouseEngine = new(broadcaster);
-        LionEngine lionEngine = new();
+        LionEngine lionEngine = new(broadcaster);
 
         broker.Subscribe(new GameEventHandler<MouseDayEndedEvent>((gameEvent) => GamePolicies.IfMouseDayEnded(gameEngine, gameEvent)));
         broker.Subscribe(new GameEventHandler<MouseDiedEvent>((gameEvent) => GamePolicies.IfMouseDied(gameEngine, gameEvent)));
@@ -28,21 +30,34 @@ internal class Program
         broker.Subscribe(new GameEventHandler<MouseReturnedHomeEvent>((gameEvent) => MousePolicies.IfMouseReturned(mouseEngine, gameEvent)));
         broker.Subscribe(new GameEventHandler<MouseEatenEvent>((gameEvent) => MousePolicies.IfEaten(mouseEngine, gameEvent)));
         broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => LionPolicies.IfNewStory(lionEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
+        broker.Subscribe(new GameEventHandler<NewDayEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
 
+
+        var  LocalhostAllowSpecificOrigins = "_localhostAllowSpecificOrigins";
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(name: LocalhostAllowSpecificOrigins,
+                            policy  =>
+                            {
+                                policy.WithOrigins("http://localhost:3000");
+                            });
+        });
+
         var app = builder.Build();
 
-                // Configure the HTTP request pipeline.
+        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseCors(LocalhostAllowSpecificOrigins);
         }
 
         app.UseHttpsRedirection();
@@ -69,23 +84,33 @@ internal class Program
         .WithName("GetMouse")
         .WithOpenApi();
 
-        app.MapPost("/play", (Guid playerId) =>
+        PlayerStore playerStore = new();
+
+        app.MapPost("/play", (string playerName) =>
         {
-            var playerType = PlayerTypes.observer;
+            var player = playerStore.GetAllPlayers().FirstOrDefault(p => p.Name == playerName);
+
+            if (player == null)
+            {
+                player = new Player(playerName);
+                playerStore.AddPlayer(player);
+            }            
+            
             if (!gameEngine.IsGameRunning) 
             {
-                gameEngine.New(playerId);
-                playerType = PlayerTypes.mouse;
+                gameEngine.New(player.Id);
             }
 
-            return new { SocketAddress = "ws://0.0.0.0:8181", PlayerType = playerType.ToString() };
+            return new { SocketAddress = "ws://127.0.0.1:8001", PlayerId = player.Id.ToString() };
         })
         .WithName("NewGame")
         .WithOpenApi();
 
-        WebSocketServer server = new("ws://0.0.0.0:8181");
+        WebSocketServer server = new("ws://127.0.0.1:8001");
 
         server.Start((connection) => ConfigWebsocketServer(gameEngine, mouseEngine, connection, (conn) => wsConnections.Add(conn)));
+
+        app.Run();
     }
 
     private static void BroadcastGameEvent(List<IWebSocketConnection> wsConnections, IGameEvent gameEvent)
@@ -121,8 +146,11 @@ internal class Program
 
     private class ClientCommand
     {
-        public GameCommands CommandType { get; internal set; }
-        public Guid PlayerId { get; internal set; }
+        [JsonPropertyName("commandType")]
+        public GameCommands CommandType { get; set; }
+
+        [JsonPropertyName("playerId")]
+        public Guid PlayerId { get; set; }
     }
 
     private enum GameCommands
