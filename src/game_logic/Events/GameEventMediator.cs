@@ -1,27 +1,12 @@
+using System.Collections.Concurrent;
+
 namespace lion_and_mouse_game.Events
 {
-    public class WebSocketGameEventBroadcaster : IEventPub
+
+
+    public class GameEventMediator : IEventMediator
     {
-        private IEventPub innerPublisher;
-        private Action<IGameEvent> pushEvent;
-
-        public WebSocketGameEventBroadcaster(IEventPub innerPublisher, Action<IGameEvent> pushEvent)
-        {
-            this.innerPublisher = innerPublisher;
-            this.pushEvent = pushEvent;
-        }
-
-        void IEventPub.Publish<T>(T gameEvent)
-        {
-            innerPublisher.Publish(gameEvent);
-            pushEvent(gameEvent);
-        }
-    }
-
-
-    public class GameEventMediator : IEventPub, IEventSub
-    {
-        private readonly Dictionary<Type, List<Action<IGameEvent>>> subs = new Dictionary<Type, List<Action<IGameEvent>>>();
+        private readonly ConcurrentDictionary<Type, List<Action<IGameEvent>>> subs = new ConcurrentDictionary<Type, List<Action<IGameEvent>>>();
         public void Publish<T>(T gameEvent) where T : class, IGameEvent
         {
             var type = typeof(T);
@@ -43,6 +28,10 @@ namespace lion_and_mouse_game.Events
                 subs[type] = new List<Action<IGameEvent>> { handler.Handle };
             }
         }
+    }
+
+    public interface IEventMediator : IEventPub, IEventSub
+    {
     }
 
     public interface IEventPub

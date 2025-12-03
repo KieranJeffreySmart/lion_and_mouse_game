@@ -4,16 +4,59 @@ namespace lion_and_mouse_game.LionContext
 {
     public class LionPolicies
     {
-        public static void IfNewStory(LionEngine lionEngine, NewStoryEvent gameEvent)
+        private readonly ILionBehaviorCalculator lionBehaviorCalculator;
+        private readonly LionEngine lionEngine;
+
+        public LionPolicies(ILionBehaviorCalculator lionBehaviorCalculator, LionEngine lionEngine)
+        {
+            this.lionBehaviorCalculator = lionBehaviorCalculator;
+            this.lionEngine = lionEngine;
+        }
+
+        public void IfNewStory(NewStoryEvent gameEvent)
         {
             lionEngine.NewLion(gameEvent.LionStartingState);
         }
 
-        public static void IfNewDay(LionEngine lionEngine, NewDayEvent gameEvent)
+        public void IfNewDay(NewDayEvent gameEvent)
         {
-            if (lionEngine.IsAtHome) lionEngine.Hunt();
-            else if (lionEngine.IsHunting) lionEngine.Sleep();
-            else if (lionEngine.IsSleeping) lionEngine.GoHome();
+            LionBehaviours behavior = lionBehaviorCalculator.Calculate(lionEngine, gameEvent);
+            switch (behavior)
+            {
+                case LionBehaviours.Hunt:
+                    lionEngine.Hunt();
+                    break;
+                case LionBehaviours.Sleep:
+                    lionEngine.Sleep();
+                    break;
+                case LionBehaviours.GoHome:
+                    lionEngine.GoHome();
+                    break;
+            }
         }
+    }
+
+    public interface ILionBehaviorCalculator
+    {
+        LionBehaviours Calculate(LionEngine lionEngine, NewDayEvent gameEvent);
+    }
+
+    public class DefaultLionBehaviorCalculator : ILionBehaviorCalculator
+    {
+        public LionBehaviours Calculate(LionEngine lionEngine, NewDayEvent gameEvent)
+        {
+            // Default behaviour: Lion always stays at home
+            if (lionEngine.IsAtHome) return LionBehaviours.Hunt;
+            else if (lionEngine.IsHunting) return LionBehaviours.Sleep;
+            else if (lionEngine.IsSleeping) return LionBehaviours.GoHome;
+            else return LionBehaviours.GoHome;
+        }
+    }
+
+    public enum LionBehaviours
+    {
+        Hunt,
+        Sleep,
+        GoHome
     }
 }

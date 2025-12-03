@@ -1,5 +1,5 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using centralised_game_api;
 using Fleck;
 using lion_and_mouse_game.Events;
 using lion_and_mouse_game.GameContext;
@@ -7,34 +7,38 @@ using lion_and_mouse_game.LionContext;
 using lion_and_mouse_game.MouseContext;
 using lion_and_mouse_game.PlayerContext;
 using lion_and_mouse_game.StoryContext;
+using Microsoft.AspNetCore.Mvc;
 
 
-internal class Program
+public class Program
 {
-    private static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        List<IWebSocketConnection> wsConnections = new();
-        GameEventMediator broker = new();
-        WebSocketGameEventBroadcaster broadcaster = new WebSocketGameEventBroadcaster(broker, (gameEvent) => BroadcastGameEvent(wsConnections, gameEvent));
-        GameEngine gameEngine = new(broadcaster);
-        StoryEngine storyEngine = new(broadcaster);
-        MouseEngine mouseEngine = new(broadcaster);
-        LionEngine lionEngine = new(broadcaster);
-
-        broker.Subscribe(new GameEventHandler<MouseDayEndedEvent>((gameEvent) => GamePolicies.IfMouseDayEnded(gameEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<MouseDiedEvent>((gameEvent) => GamePolicies.IfMouseDied(gameEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<NewGameStartedEvent>((gameEvent) => StoryPolicies.IfNewGame(storyEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<ActionTakenEvent>((gameEvent) => StoryPolicies.IfActionTaken(storyEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => MousePolicies.IfNewStory(mouseEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => MousePolicies.IfDayEnded(mouseEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<MouseReturnedHomeEvent>((gameEvent) => MousePolicies.IfMouseReturned(mouseEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<MouseEatenEvent>((gameEvent) => MousePolicies.IfEaten(mouseEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => LionPolicies.IfNewStory(lionEngine, gameEvent)));
-        broker.Subscribe(new GameEventHandler<NewDayEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
-
-
         var  LocalhostAllowSpecificOrigins = "_localhostAllowSpecificOrigins";
         var builder = WebApplication.CreateBuilder(args);
+        
+        List<IWebSocketConnection> wsConnections = new();
+
+        GameEventMediator eventMediator = new();
+
+        builder.Services.AddSingleton<IEventMediator>(eventMediator);
+        builder.Services.AddSingleton<IEventSub>(eventMediator);
+
+        builder.Services.AddSingleton<IEventPub>(sp =>
+        {
+            return new WebSocketGameEventBroadcaster(sp.GetRequiredService<IEventMediator>(), (gameEvent) => BroadcastGameEvent(wsConnections, gameEvent));
+        });
+        builder.Services.AddSingleton<EngineFactory>();
+        builder.Services.AddSingleton<ILionBehaviorCalculator, DefaultLionBehaviorCalculator>();
+        builder.Services.AddSingleton(sp =>
+        {
+            return new LionPolicies(sp.GetRequiredService<ILionBehaviorCalculator>(), sp.GetRequiredService<EngineFactory>().GetLionEngine());
+        });
+        builder.Services.AddSingleton(sp =>
+        {
+            var engineFactory = sp.GetRequiredService<EngineFactory>();
+            return new CommandHandler(engineFactory.GetGameEngine(), engineFactory.GetMouseEngine());
+        });
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -62,31 +66,32 @@ internal class Program
 
         app.UseHttpsRedirection();
 
-        app.MapGet("/game", () =>
+        app.MapGet("/game", ([FromServices] EngineFactory engineFactory) =>
         {
-            return gameEngine.GetGame();
+            return engineFactory.GetGameEngine().GetGame();
         })
         .WithName("GetGame")
         .WithOpenApi();
         
-        app.MapGet("/story", () =>
+        app.MapGet("/story", ([FromServices] EngineFactory engineFactory) =>
         {
-            return storyEngine.GetStory();
+            return engineFactory.GetStoryEngine().GetStory();
         })
         .WithName("GetStory")
         .WithOpenApi();
         
         
-        app.MapGet("/mouse", () =>
+        app.MapGet("/mouse", ([FromServices] EngineFactory engineFactory) =>
         {
-            return mouseEngine.GetMouse();
+            return engineFactory.GetMouseEngine().GetMouse();
         })
         .WithName("GetMouse")
         .WithOpenApi();
 
         PlayerStore playerStore = new();
+        var webSocketUri = new Uri("ws://127.0.0.1:8001");
 
-        app.MapPost("/play", (string playerName) =>
+        app.MapPost("/play", ([FromQuery] string playerName, [FromServices] EngineFactory engineFactory) =>
         {
             var player = playerStore.GetAllPlayers().FirstOrDefault(p => p.Name == playerName);
 
@@ -96,21 +101,47 @@ internal class Program
                 playerStore.AddPlayer(player);
             }            
             
-            if (!gameEngine.IsGameRunning) 
+            if (!engineFactory.GetGameEngine().IsGameRunning) 
             {
-                gameEngine.New(player.Id);
+                engineFactory.GetGameEngine().New(player.Id);
             }
 
-            return new { SocketAddress = "ws://127.0.0.1:8001", PlayerId = player.Id.ToString() };
+            return new NewGameResult(webSocketUri, player.Id);
         })
         .WithName("NewGame")
         .WithOpenApi();
 
-        WebSocketServer server = new("ws://127.0.0.1:8001");
+        app.MapPost("/command", ([FromBody] ClientCommand command, [FromServices] CommandHandler commandHandler) =>
+        {
+            commandHandler.Handle(command);
+        })
+        .WithName("NewCommand")
+        .WithOpenApi();
 
-        server.Start((connection) => ConfigWebsocketServer(gameEngine, mouseEngine, connection, (conn) => wsConnections.Add(conn)));
+        WebSocketServer server = new(webSocketUri.ToString());
+        var commandHandler = app.Services.GetRequiredService<CommandHandler>();
+        server.Start((connection) => ConfigWebsocketServer(commandHandler, connection, (conn) => wsConnections.Add(conn)));
+
+        SubscribeToEvents(eventMediator, app.Services.GetRequiredService<LionPolicies>(), app.Services.GetRequiredService<EngineFactory>());
 
         app.Run();
+    }
+
+    private static void SubscribeToEvents(GameEventMediator eventMediator, LionPolicies lionPolicies, EngineFactory engineFactory)
+    {
+        var gameEngine = engineFactory.GetGameEngine();
+        var mouseEngine = engineFactory.GetMouseEngine();
+        var storyEngine = engineFactory.GetStoryEngine();
+        eventMediator.Subscribe(new GameEventHandler<MouseDayEndedEvent>((gameEvent) => GamePolicies.IfMouseDayEnded(gameEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<MouseDiedEvent>((gameEvent) => GamePolicies.IfMouseDied(gameEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<NewGameStartedEvent>((gameEvent) => StoryPolicies.IfNewGame(storyEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<ActionTakenEvent>((gameEvent) => StoryPolicies.IfActionTaken(storyEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => MousePolicies.IfNewStory(mouseEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => MousePolicies.IfDayEnded(mouseEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<MouseReturnedHomeEvent>((gameEvent) => MousePolicies.IfMouseReturned(mouseEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<MouseEatenEvent>((gameEvent) => MousePolicies.IfEaten(mouseEngine, gameEvent)));
+        eventMediator.Subscribe(new GameEventHandler<NewStoryEvent>(lionPolicies.IfNewStory));
+        eventMediator.Subscribe(new GameEventHandler<NewDayEvent>(lionPolicies.IfNewDay));
     }
 
     private static void BroadcastGameEvent(List<IWebSocketConnection> wsConnections, IGameEvent gameEvent)
@@ -121,47 +152,19 @@ internal class Program
         }
     }
 
-    private static void ConfigWebsocketServer(GameEngine gameEngine, MouseEngine mouseEngine, IWebSocketConnection connection, Action<IWebSocketConnection> addConnection)
+    private static void ConfigWebsocketServer(CommandHandler commandHandler, IWebSocketConnection connection, Action<IWebSocketConnection> addConnection)
     {
         connection.OnOpen = () => addConnection(connection);
-        connection.OnMessage = (message) => HandleClientMessage(gameEngine, mouseEngine, message);
+        connection.OnMessage = (message) => HandleClientMessage(commandHandler, message);
     }
 
-    private static void HandleClientMessage(GameEngine gameEngine, MouseEngine mouseEngine, string message)
+    private static void HandleClientMessage(CommandHandler commandHandler, string message)
     {
         var command = JsonSerializer.Deserialize<ClientCommand>(message);
 
-        if (command is null) return;
+        if (command == null)
+            return;
 
-        if (command.CommandType == GameCommands.MouseHunt)
-        {
-            if (gameEngine.IsGameRunning && gameEngine.CurrentPlayerId == command.PlayerId) mouseEngine.Hunt();
-        }
-        
-        if (command.CommandType == GameCommands.MouseStayAtHome)
-        {
-            if (gameEngine.IsGameRunning && gameEngine.CurrentPlayerId == command.PlayerId) mouseEngine.StayAtHome();
-        }
-    }
-
-    private class ClientCommand
-    {
-        [JsonPropertyName("commandType")]
-        public GameCommands CommandType { get; set; }
-
-        [JsonPropertyName("playerId")]
-        public Guid PlayerId { get; set; }
-    }
-
-    private enum GameCommands
-    {
-        MouseHunt,
-        MouseStayAtHome
-    }
-
-    private enum PlayerTypes
-    {
-        mouse,
-        observer
+        commandHandler.Handle(command);
     }
 }

@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lion_and_mouse_game", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "centralised_game_api", "src\centralised_game_api\centralised_game_api.csproj", "{9D1DF4DE-F8A0-4A76-8B5C-0B0D02273249}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "centralised_game_api_tests", "src\centralised_game_api_tests\centralised_game_api_tests.csproj", "{2731DACE-715D-40C1-B67F-8EF897757812}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{9D1DF4DE-F8A0-4A76-8B5C-0B0D02273249}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D1DF4DE-F8A0-4A76-8B5C-0B0D02273249}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D1DF4DE-F8A0-4A76-8B5C-0B0D02273249}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2731DACE-715D-40C1-B67F-8EF897757812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2731DACE-715D-40C1-B67F-8EF897757812}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2731DACE-715D-40C1-B67F-8EF897757812}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2731DACE-715D-40C1-B67F-8EF897757812}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +50,7 @@ Global
 		{1F270C2E-6253-4D72-87A9-852F9E26E05A} = {F2485930-9298-4C13-BD18-15B1F440B902}
 		{AE0797A4-617F-47ED-A8F8-1AB2E555B5E5} = {F2485930-9298-4C13-BD18-15B1F440B902}
 		{9D1DF4DE-F8A0-4A76-8B5C-0B0D02273249} = {F2485930-9298-4C13-BD18-15B1F440B902}
+		{2731DACE-715D-40C1-B67F-8EF897757812} = {F2485930-9298-4C13-BD18-15B1F440B902}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EADDA707-53A2-40FB-A83C-AD256901B419}

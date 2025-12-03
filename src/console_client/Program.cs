@@ -9,6 +9,7 @@ GameEngine gameEngine = new(broker);
 StoryEngine storyEngine = new(broker);
 MouseEngine mouseEngine = new(broker);
 LionEngine lionEngine = new(broker);
+LionPolicies lionPolicies = new(new DefaultLionBehaviorCalculator(), lionEngine);
 
 broker.Subscribe(new GameEventHandler<MouseDayEndedEvent>((gameEvent) => GamePolicies.IfMouseDayEnded(gameEngine, gameEvent)));
 broker.Subscribe(new GameEventHandler<MouseDiedEvent>((gameEvent) => GamePolicies.IfMouseDied(gameEngine, gameEvent)));
@@ -18,8 +19,8 @@ broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => MousePolicie
 broker.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => MousePolicies.IfDayEnded(mouseEngine, gameEvent)));
 broker.Subscribe(new GameEventHandler<MouseReturnedHomeEvent>((gameEvent) => MousePolicies.IfMouseReturned(mouseEngine, gameEvent)));
 broker.Subscribe(new GameEventHandler<MouseEatenEvent>((gameEvent) => MousePolicies.IfEaten(mouseEngine, gameEvent)));
-broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => LionPolicies.IfNewStory(lionEngine, gameEvent)));
-broker.Subscribe(new GameEventHandler<NewDayEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
+broker.Subscribe(new GameEventHandler<NewStoryEvent>(lionPolicies.IfNewStory));
+broker.Subscribe(new GameEventHandler<NewDayEvent>(lionPolicies.IfNewDay));
 
 
 Console.WriteLine("Welcome to The Lion and Mouse survival game\r\n");

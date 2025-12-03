@@ -1,8 +1,6 @@
 import './App.css';
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useWebSocket from 'react-use-websocket';
-import StoryState from './components/StoryState';
-import MouseState from './components/MouseState';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
