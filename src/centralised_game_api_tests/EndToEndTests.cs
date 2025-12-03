@@ -110,10 +110,10 @@ public class EndToEndTests : IClassFixture<CustomWebApplicationFactory<Program>>
         };
 
         var newGameResponse = await client.PostAsync($"/play?playerName={playerName}", null);
+        Assert.NotNull(newGameResponse);
         var newGameResult = (await newGameResponse.Content.ReadFromJsonAsync<NewGameResult>(options)) ?? throw new Exception("Failed to deserialize response body");
 
         // Then I expect to receive initial game data
-        Assert.NotNull(newGameResult);
         Assert.NotEqual(Guid.Empty, newGameResult.PlayerId);
         Assert.NotNull(newGameResult.SocketAddress);
 
@@ -156,7 +156,33 @@ public class EndToEndTests : IClassFixture<CustomWebApplicationFactory<Program>>
         Assert.Equal(STORY_TEXT_SIMPLE_WIN, finalStoryData.StoryText);
         
         //When I start a new game
+        newGameResponse = await client.PostAsync($"/play?playerName={playerName}", null);
+        Assert.NotNull(newGameResponse);
+        
+        // And get the game data
+        var startedGameDataResponse = await client.GetAsync($"/game");
+        Assert.NotNull(startedGameDataResponse);
+        var startedGameData = (await startedGameDataResponse.Content.ReadFromJsonAsync<GameData>(options)) ?? throw new Exception("Failed to deserialize game data");
+
+        // And get the story data
+        var startedStoryDataResponse = await client.GetAsync($"/story");
+        Assert.NotNull(startedStoryDataResponse);
+        var startedStoryData = (await startedStoryDataResponse.Content.ReadFromJsonAsync<StoryData>(options)) ?? throw new Exception("Failed to deserialize story data");
 
         //Then the game data should be reset
+        Assert.NotNull(newGameResult);
+        Assert.NotEqual(Guid.Empty, newGameResult.PlayerId);
+        Assert.NotNull(newGameResult.SocketAddress);
+
+        Assert.NotNull(startedGameData);
+        Assert.NotEqual(string.Empty, startedGameData.Id);
+        Assert.Equal(GameStates.Playing.ToString(), startedGameData.GameState);
+        Assert.Equal(-1, startedGameData.FinishingFood);
+        Assert.Equal("None", startedGameData.Accolade);
+        
+        // And the story data should be set to starting values
+        Assert.NotEqual(string.Empty, startedStoryData.Id);
+        Assert.Equal(1, startedStoryData.CurrentDay);
+        Assert.Equal("\r\nOnce upon a time there was a little mouse\r\n", startedStoryData.StoryText);
     }
 }

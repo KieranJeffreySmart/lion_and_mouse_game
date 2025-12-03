@@ -12,6 +12,7 @@ namespace lion_and_mouse_game.StoryContext
         {
             currentStory = new Story(1);
             currentStory = currentStory.AddParagraph("\r\nOnce upon a time there was a little mouse\r\n");
+            actions.Clear();
             eventBroker.Publish(new NewStoryEvent(lionStartingState));
         }
 
