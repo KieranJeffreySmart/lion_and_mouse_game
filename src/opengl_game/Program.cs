@@ -39,6 +39,7 @@ void OnLoad()
     for (int i = 0; i < input.Keyboards.Count; i++)
         input.Keyboards[i].KeyDown += KeyDown;
 
+    LionPolicies lionPolicies = new(new DefaultLionBehaviorCalculator(), lionEngine);
     broker.Subscribe(new GameEventHandler<MouseDayEndedEvent>((gameEvent) => GamePolicies.IfMouseDayEnded(gameEngine, gameEvent)));
     broker.Subscribe(new GameEventHandler<MouseDiedEvent>((gameEvent) => GamePolicies.IfMouseDied(gameEngine, gameEvent)));
     broker.Subscribe(new GameEventHandler<NewGameStartedEvent>((gameEvent) => StoryPolicies.IfNewGame(storyEngine, gameEvent)));
@@ -47,8 +48,8 @@ void OnLoad()
     broker.Subscribe(new GameEventHandler<DayEndedEvent>((gameEvent) => MousePolicies.IfDayEnded(mouseEngine, gameEvent)));
     broker.Subscribe(new GameEventHandler<MouseReturnedHomeEvent>((gameEvent) => MousePolicies.IfMouseReturned(mouseEngine, gameEvent)));
     broker.Subscribe(new GameEventHandler<MouseEatenEvent>((gameEvent) => MousePolicies.IfEaten(mouseEngine, gameEvent)));
-    broker.Subscribe(new GameEventHandler<NewStoryEvent>((gameEvent) => LionPolicies.IfNewStory(lionEngine, gameEvent)));
-    broker.Subscribe(new GameEventHandler<NewDayEvent>((gameEvent) => LionPolicies.IfNewDay(lionEngine, gameEvent)));
+    broker.Subscribe(new GameEventHandler<NewStoryEvent>(lionPolicies.IfNewStory));
+    broker.Subscribe(new GameEventHandler<NewDayEvent>(lionPolicies.IfNewDay));
 }
 
 void KeyDown(IKeyboard keyboard, Key key, int arg3)
