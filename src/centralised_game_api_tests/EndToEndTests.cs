@@ -13,9 +13,6 @@ namespace centralised_game_api_tests;
 public class EndToEndTests : IClassFixture<CustomWebApplicationFactory<Program>>
 {
     private readonly CustomWebApplicationFactory<Program> _factory;
-
-    private const string STORY_TEXT_SIMPLE_WIN = "\r\nOnce upon a time there was a little mouse\r\n\r\n\r\nOn day 1, while searching for something to eat the mouse found a sleeping lion and in her haste returned home with only 1 food\r\n\r\nOn day 2, after searching for something to eat the mouse returned home with 2 food\r\n\r\nOn day 3, after searching for something to eat the mouse returned home with 2 food\r\n\r\nOn day 4, after searching for something to eat the mouse returned home with 2 food\r\n\r\nOn day 5, after searching for something to eat the mouse returned home with 2 food\r\n\r\nOn day 6, after searching for something to eat the mouse returned home with 2 food\r\n\r\nOn day 7, after searching for something to eat the mouse returned home with 2 food";
-
     public EndToEndTests(CustomWebApplicationFactory<Program> factory)
     {
         _factory = factory;
@@ -93,7 +90,7 @@ public class EndToEndTests : IClassFixture<CustomWebApplicationFactory<Program>>
     }
     
     [Fact]
-    public async Task SimpleWinningRunThrough()
+    public async Task SimpleWinningRunThroughAndRestart()
     {
         // Given I have a players name
         var playerName = "bob";
@@ -153,12 +150,12 @@ public class EndToEndTests : IClassFixture<CustomWebApplicationFactory<Program>>
         Assert.NotNull(finalStoryDataResponse);
         var finalStoryData = (await finalStoryDataResponse.Content.ReadFromJsonAsync<StoryData>(options)) ?? throw new Exception("Failed to deserialize story data");
         Assert.Equal(8, finalStoryData.CurrentDay);
-        Assert.Equal(STORY_TEXT_SIMPLE_WIN, finalStoryData.StoryText);
+        Assert.Equal(GameRunTestData.STORY_TEXT_SIMPLE_WIN, finalStoryData.StoryText);
         
         //When I start a new game
         newGameResponse = await client.PostAsync($"/play?playerName={playerName}", null);
         Assert.NotNull(newGameResponse);
-        
+
         // And get the game data
         var startedGameDataResponse = await client.GetAsync($"/game");
         Assert.NotNull(startedGameDataResponse);
@@ -184,5 +181,48 @@ public class EndToEndTests : IClassFixture<CustomWebApplicationFactory<Program>>
         Assert.NotEqual(string.Empty, startedStoryData.Id);
         Assert.Equal(1, startedStoryData.CurrentDay);
         Assert.Equal("\r\nOnce upon a time there was a little mouse\r\n", startedStoryData.StoryText);
+    }
+
+
+    [Theory]
+    [InlineData("Bob", "SimpleWinScenario")]
+    public async Task GameScenarioRunThroughs(string playerName, string scenario)
+    {
+        if (!GameRunTestData.Scenarios.ContainsKey(scenario)) throw new Exception($"Scenario {scenario} not found");
+        var scenarioData = GameRunTestData.Scenarios[scenario];
+        var client = _factory.CreateClient();
+        _factory.SetLionBehavior(scenarioData.LionBehavior);
+        var options = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            IncludeFields = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
+            Converters = { new JsonStringEnumConverter() }
+        };
+        var newGameResponse = await client.PostAsync($"/play?playerName={playerName}", null);
+        Assert.NotNull(newGameResponse);
+        var newGameResult = (await newGameResponse.Content.ReadFromJsonAsync<NewGameResult>(options)) ?? throw new Exception("Failed to deserialize response body");
+        Assert.NotEqual(Guid.Empty, newGameResult.PlayerId);
+        
+        foreach (var command in scenarioData.GetCommands(newGameResult.PlayerId))
+        {
+            var commandResponse = await client.PostAsJsonAsync("/command", command);
+            Assert.NotNull(commandResponse);
+            Assert.True(commandResponse.IsSuccessStatusCode);
+        }
+        
+        var finalGameResponse = await client.GetAsync($"/game");
+        Assert.NotNull(finalGameResponse);
+        var finalGameData = (await finalGameResponse.Content.ReadFromJsonAsync<GameData>(options)) ?? throw new Exception("Failed to deserialize final game data");
+        Assert.Equal(scenarioData.ExpectedGameDataAfterCommands.GameState, finalGameData.GameState);
+        Assert.Equal(scenarioData.ExpectedGameDataAfterCommands.FinishingFood, finalGameData.FinishingFood);
+        Assert.Equal(scenarioData.ExpectedGameDataAfterCommands.Accolade, finalGameData.Accolade);
+
+        var finalStoryResponse = await client.GetAsync($"/story");
+        Assert.NotNull(finalStoryResponse);
+        var finalStoryData = (await finalStoryResponse.Content.ReadFromJsonAsync<StoryData>(options)) ?? throw new Exception("Failed to deserialize final story data");
+        Assert.Equal(scenarioData.ExpectedStoryDataAfterCommands.CurrentDay, finalStoryData.CurrentDay);
+        Assert.Equal(scenarioData.ExpectedStoryDataAfterCommands.StoryText, finalStoryData.StoryText);
     }
 }
