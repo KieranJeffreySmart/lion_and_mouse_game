@@ -1,19 +1,29 @@
 using game_domain_api.Events;
+using game_domain_api.Repository;
 
 namespace game_domain_api.GameContext
 {
-    public class GameEngine(IEventPub eventBroker)
+    public class GameEngine(IEventPub eventBroker, IGameDataRepository gameDataRepository): IGameEngine
     {
         private Game? loadedGame = null;
         readonly IEventPub eventBroker = eventBroker;
+        readonly IGameDataRepository gameDataRepository = gameDataRepository;
 
         public bool IsGameRunning => loadedGame?.GameState == GameStates.Playing;
 
         public Guid CurrentPlayerId => loadedGame?.PlayerId ?? Guid.Empty;
 
-        public void New(Guid playerId)
+        public async Task New(Guid playerId)
         {
             loadedGame = new Game(GameStates.Playing, playerId);
+            await gameDataRepository.AddAsync(new GameData
+            {
+                Id = loadedGame.Id,
+                GameState = loadedGame.GameState,
+                FinishingFood = loadedGame.FinishingFood,
+                Accolade = loadedGame.Accolade,
+                PlayerId = loadedGame.PlayerId
+            });
             eventBroker.Publish(new NewGameStartedEvent(LionStates.Sleeping));
         }
 
@@ -46,17 +56,31 @@ namespace game_domain_api.GameContext
                     Id = loadedGame.Id,
                     GameState = loadedGame.GameState,
                     FinishingFood = loadedGame.FinishingFood,
-                    Accolade = loadedGame.Accolade
+                    Accolade = loadedGame.Accolade,
+                    PlayerId = loadedGame.PlayerId
                 };
+        }
+
+        public async Task LoadGameById(Guid gameId)
+        {
+            var gameData = await gameDataRepository.GetByIdAsync(gameId);
+            if (gameData is null)
+            {
+                throw new Exception($"Game with Id {gameId} not found");
+            }
+
+            loadedGame = new Game(gameData.Id, gameData.GameState, gameData.PlayerId, gameData.FinishingFood, gameData.Accolade);
         }
     }
 
-    [Serializable]
-    public class GameData
+    public interface IGameEngine
     {
-        public Guid Id { get; set; } = Guid.Empty;
-        public GameStates GameState { get; set; } = GameStates.Unknown;
-        public int FinishingFood { get; set; } = -1;
-        public Accolades Accolade { get; set; } = Accolades.Unknown;
+        public bool IsGameRunning { get; }
+        public Guid CurrentPlayerId { get; }
+        Task New(Guid playerId);
+        void GameOver();
+        void WinGame(int foodStored);
+        GameData GetGame();
+        Task LoadGameById(Guid gameId);
     }
 }

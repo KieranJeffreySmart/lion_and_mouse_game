@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using game_domain_api.GameContext;
 using game_domain_api.ApiDtos;
+using game_domain_api;
 
 namespace game_domain_api_tests;
 
