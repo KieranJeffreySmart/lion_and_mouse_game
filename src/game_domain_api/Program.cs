@@ -48,7 +48,7 @@ namespace game_domain_api
             app.MapPost("/game", async ([FromBody] NewGameDto newGameDto, [FromServices] IGameEngine gameEngine) =>
             {
                 await gameEngine.New(newGameDto.PlayerId);
-                var gameData = gameEngine.GetGame();
+                var gameData = gameEngine.GetGameData();
                 return new NewGameResultDto
                 {
                     GameId = gameData.Id,
@@ -59,7 +59,7 @@ namespace game_domain_api
             app.MapGet("/game/{gameId}", async (Guid gameId, [FromServices] IGameEngine gameEngine) =>
             {
                 await gameEngine.LoadGameById(gameId);
-                return gameEngine.GetGame();
+                return gameEngine.GetGameData();
             })
             .WithName("GetGame")
             .WithOpenApi();

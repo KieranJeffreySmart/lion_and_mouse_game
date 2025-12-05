@@ -15,27 +15,20 @@ namespace game_domain_api.GameContext
 
         public async Task New(Guid playerId)
         {
-            loadedGame = new Game(GameStates.Playing, playerId);
-            await gameDataRepository.AddAsync(new GameData
-            {
-                Id = loadedGame.Id,
-                GameState = loadedGame.GameState,
-                FinishingFood = loadedGame.FinishingFood,
-                Accolade = loadedGame.Accolade,
-                PlayerId = loadedGame.PlayerId
-            });
+            loadedGame = new Game(new GameData { Id = Guid.NewGuid(), GameState = GameStates.Playing, PlayerId = playerId });
+            await gameDataRepository.AddAsync(loadedGame.AsData());
             eventBroker.Publish(new NewGameStartedEvent(LionStates.Sleeping));
         }
 
         public void GameOver()
         {
-            loadedGame = loadedGame?.LoseGame();
+            loadedGame?.LoseGame();
             eventBroker.Publish(new GameLost());
         }
 
         public void WinGame(int foodStored)
         {
-            loadedGame = loadedGame?.WinGame(foodStored, CalculateAccolade(foodStored));
+            loadedGame?.WinGame(foodStored, CalculateAccolade(foodStored));
             eventBroker.Publish(new GameWon(foodStored, CalculateAccolade(foodStored)));
         }
 
@@ -47,18 +40,9 @@ namespace game_domain_api.GameContext
             return Accolades.Survivor;
         }
 
-        public GameData GetGame()
+        public GameData GetGameData()
         {
-            return loadedGame is null
-                ? new GameData { }
-                : new GameData
-                {
-                    Id = loadedGame.Id,
-                    GameState = loadedGame.GameState,
-                    FinishingFood = loadedGame.FinishingFood,
-                    Accolade = loadedGame.Accolade,
-                    PlayerId = loadedGame.PlayerId
-                };
+            return loadedGame?.AsData() ?? new GameData { };
         }
 
         public async Task LoadGameById(Guid gameId)
@@ -69,7 +53,7 @@ namespace game_domain_api.GameContext
                 throw new Exception($"Game with Id {gameId} not found");
             }
 
-            loadedGame = new Game(gameData.Id, gameData.GameState, gameData.PlayerId, gameData.FinishingFood, gameData.Accolade);
+            loadedGame = new Game(gameData);
         }
     }
 
@@ -80,7 +64,7 @@ namespace game_domain_api.GameContext
         Task New(Guid playerId);
         void GameOver();
         void WinGame(int foodStored);
-        GameData GetGame();
+        GameData GetGameData();
         Task LoadGameById(Guid gameId);
     }
 }

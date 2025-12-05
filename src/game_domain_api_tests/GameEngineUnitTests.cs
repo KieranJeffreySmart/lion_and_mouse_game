@@ -19,7 +19,7 @@ namespace game_domain_api_tests
             
             // Act
             await sut.New(playerId);
-            var gameData = sut.GetGame();
+            var gameData = sut.GetGameData();
             
             // Assert
             Assert.Equal(playerId, sut.CurrentPlayerId);
@@ -27,7 +27,7 @@ namespace game_domain_api_tests
             Assert.NotEqual(Guid.Empty, gameData.Id);
             Assert.Equal(GameStates.Playing, gameData.GameState);
             Assert.Equal(-1, gameData.FinishingFood);
-            Assert.Equal(Accolades.None, gameData.Accolade);
+            Assert.Equal(Accolades.Unknown, gameData.Accolade);
             Assert.Equal(playerId, gameData.PlayerId);
         }
 
@@ -49,11 +49,10 @@ namespace game_domain_api_tests
             mockGameDataRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(expectedGameData);
             IGameEngine sut = new GameEngine(mockEventPub.Object, mockGameDataRepository.Object);
-
             
             // Act
             await sut.LoadGameById(playerId);
-            var gameData = sut.GetGame();
+            var gameData = sut.GetGameData();
             
             // Assert
             Assert.Equal(playerId, sut.CurrentPlayerId);
@@ -64,5 +63,7 @@ namespace game_domain_api_tests
             Assert.Equal(expectedGameData.Accolade, gameData.Accolade);
             Assert.Equal(expectedGameData.PlayerId, gameData.PlayerId);
         }
+
+
     }
 }

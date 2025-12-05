@@ -1,28 +1,60 @@
 namespace game_domain_api.GameContext
 {
-    public class Game(GameStates state, Guid playerId)
+    public class Game
     {
-        public Game(Guid id, GameStates state, Guid playerId, int finishingFood, Accolades accolade) : this(state, playerId)
+        private GameData _data = new();
+
+        public Game(GameData data)
         {
-            Id = id;
-            FinishingFood = finishingFood;
-            Accolade = accolade;
+            _data = new GameData
+            {
+                Id = data.Id,
+                GameState = data.GameState,
+                FinishingFood = data.FinishingFood,
+                Accolade = data.Accolade,
+                PlayerId = data.PlayerId
+            };
         }
 
-        public Guid Id { get; } = Guid.NewGuid();
-        public GameStates GameState { get; } = state;
-        public Guid PlayerId { get; } = playerId;
-        public int FinishingFood { get; } = -1;
-        public Accolades Accolade { get; } = Accolades.None;
-
-        public Game LoseGame()
+        public Guid Id => _data.Id;
+        public GameStates GameState => _data.GameState;
+        public Guid PlayerId => _data.PlayerId;
+        public int FinishingFood => _data.FinishingFood;
+        public Accolades Accolade => _data.Accolade;
+        public void LoseGame()
         {
-            return new Game(Id, GameStates.Lost, PlayerId, FinishingFood, Accolade);
+            _data =  new GameData
+            {
+                Id = _data.Id,
+                GameState = GameStates.Lost,
+                FinishingFood = _data.FinishingFood,
+                Accolade = _data.Accolade,
+                PlayerId = _data.PlayerId
+            };
         }
 
-        public Game WinGame(int foodStored, Accolades accolade)
+        public void WinGame(int foodStored, Accolades accolade)
         {
-            return new Game(Id, GameStates.Won, PlayerId, foodStored, accolade);
+            _data =  new GameData
+            {
+                Id = _data.Id,
+                GameState = GameStates.Won,
+                FinishingFood = foodStored,
+                Accolade = accolade,
+                PlayerId = _data.PlayerId
+            };
+        }
+
+        public GameData AsData()
+        {
+            return new GameData
+            {
+                Id = _data.Id,
+                GameState = _data.GameState,
+                FinishingFood = _data.FinishingFood,
+                Accolade = _data.Accolade,
+                PlayerId = _data.PlayerId
+            };
         }
     }
     
