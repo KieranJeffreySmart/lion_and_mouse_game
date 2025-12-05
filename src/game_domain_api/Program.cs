@@ -22,17 +22,18 @@ namespace game_domain_api
             builder.Services.AddSingleton<IEventPub>(inMemoryEventMediator);
 
             var connectionType = Environment.GetEnvironmentVariable("DB_CONNECTION_TYPE") ?? string.Empty;
+            var connectionName = Environment.GetEnvironmentVariable("DB_CONNECTION_NAME") ?? "gameDatadb";
             if (connectionType == "postgresdb")
             {
-                builder.AddNpgsqlDbContext<GameDbContext>(connectionName: "postgresdb");
+                builder.AddNpgsqlDbContext<GameDbContext>(connectionName: connectionName);
             }
             else
             {
-                builder.Services.AddDbContext<GameDbContext>(options => options.UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}"));
+                builder.Services.AddDbContext<GameDbContext>(options => options.UseInMemoryDatabase(connectionName));
             }
 
-            builder.Services.AddTransient<IGameDataRepository, GameDataRepository>();
-            builder.Services.AddTransient<IGameEngine, GameEngine>();
+            builder.Services.AddScoped<IGameDataRepository, GameDataRepository>();
+            builder.Services.AddScoped<IGameEngine, GameEngine>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

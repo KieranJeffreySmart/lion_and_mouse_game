@@ -10,6 +10,7 @@ namespace game_domain_api.Repository
         public GameDataRepository(GameDbContext context)
         {
             _context = context;
+            _context.Database.EnsureCreated();
         }
 
         public async Task<GameData?> GetByIdAsync(Guid id)
@@ -47,7 +48,7 @@ namespace game_domain_api.Repository
         }
     }
 
-    public class GameDbContext(DbContextOptions<GameDbContext> options) : DbContext(options)
+    public class GameDbContext : DbContext
     {
         protected override void OnModelCreating(ModelBuilder mb)
         {
@@ -56,6 +57,10 @@ namespace game_domain_api.Repository
         }
 
         public DbSet<GameData> GameData { get; set; }
+
+        public GameDbContext(DbContextOptions<GameDbContext> options) : base(options)
+        {
+        }
     }
 
     public interface IGameDataRepository
