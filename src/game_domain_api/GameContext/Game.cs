@@ -21,14 +21,14 @@ namespace game_domain_api.GameContext
         public Guid PlayerId => _data.PlayerId;
         public int FinishingFood => _data.FinishingFood;
         public Accolades Accolade => _data.Accolade;
-        public void LoseGame()
+        public void LoseGame(int foodStored)
         {
             _data =  new GameData
             {
                 Id = _data.Id,
                 GameState = GameStates.Lost,
-                FinishingFood = _data.FinishingFood,
-                Accolade = _data.Accolade,
+                FinishingFood = foodStored,
+                Accolade = Accolades.None,
                 PlayerId = _data.PlayerId
             };
         }

@@ -7,7 +7,7 @@ namespace lion_and_mouse_game.GameContext
     {
         public static void IfMouseDied(GameEngine gameEngine, MouseDiedEvent gameEvent)
         {
-            gameEngine.GameOver();
+            gameEngine.GameOver(gameEvent.FoodStored);
         }
 
         public static void IfMouseDayEnded(GameEngine gameEngine, MouseDayEndedEvent gameEvent)

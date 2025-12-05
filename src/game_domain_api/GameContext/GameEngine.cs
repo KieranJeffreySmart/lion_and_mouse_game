@@ -20,9 +20,9 @@ namespace game_domain_api.GameContext
             eventBroker.Publish(new NewGameStartedEvent(LionStates.Sleeping));
         }
 
-        public void GameOver()
+        public void GameOver(int foodStored)
         {
-            loadedGame?.LoseGame();
+            loadedGame?.LoseGame(foodStored);
             eventBroker.Publish(new GameLost());
         }
 
@@ -62,7 +62,7 @@ namespace game_domain_api.GameContext
         public bool IsGameRunning { get; }
         public Guid CurrentPlayerId { get; }
         Task New(Guid playerId);
-        void GameOver();
+        void GameOver(int foodStored);
         void WinGame(int foodStored);
         GameData GetGameData();
         Task LoadGameById(Guid gameId);

@@ -36,18 +36,4 @@ namespace game_domain_api.Events
         public string Name => nameof(GameLost);
     }
 
-    public class MouseDayEndedEvent(int currentDay, int foodStored) : IGameEvent
-    {
-        public Guid Id { get; } = Guid.NewGuid();
-        public string Name => nameof(MouseDayEndedEvent);
-        public int CurrentDay { get; } = currentDay;
-        public int FoodStored { get; } = foodStored;
-
-    }
-    
-    public class MouseDiedEvent : IGameEvent
-    {
-        public Guid Id { get; } = Guid.NewGuid();
-        public string Name => nameof(MouseDiedEvent);
-    }
 }
