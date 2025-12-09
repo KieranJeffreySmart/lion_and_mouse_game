@@ -25,7 +25,7 @@ namespace game_domain_api_tests
             Assert.Equal(playerId, sut.CurrentPlayerId);
             Assert.True(sut.IsGameRunning);
             Assert.NotEqual(Guid.Empty, gameData.Id);
-            Assert.Equal(GameStates.Playing, gameData.GameState);
+            Assert.Equal(GameStates.Started, gameData.GameState);
             Assert.Equal(-1, gameData.FinishingFood);
             Assert.Equal(Accolades.Unknown, gameData.Accolade);
             Assert.Equal(playerId, gameData.PlayerId);

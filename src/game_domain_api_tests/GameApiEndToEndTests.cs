@@ -25,7 +25,7 @@ public class GameApiEndToEndTests(CustomWebApplicationFactory<Program> factory) 
         var newGameResult = await response.Content.ReadFromJsonAsync<NewGameResultDto>();
         Assert.NotNull(newGameResult);
         Assert.NotEqual(Guid.Empty, newGameResult.GameId);
-        Assert.Equal(GameStates.Playing, newGameResult.GameState);
+        Assert.Equal(GameStates.Started, newGameResult.GameState);
 
         // Given I have a game Id
         var gameId = newGameResult.GameId;
@@ -38,6 +38,51 @@ public class GameApiEndToEndTests(CustomWebApplicationFactory<Program> factory) 
         var gameData = await gameResponse.Content.ReadFromJsonAsync<GameData>();
         Assert.NotNull(gameData);
         Assert.Equal(gameId, gameData.Id);
-        Assert.Equal(GameStates.Playing, gameData.GameState);
+        Assert.Equal(GameStates.Started, gameData.GameState);
+    }
+    
+    [Fact]
+    public async Task ProgressADay()
+    {
+        var client = _factory.CreateClient();
+
+        // Given I have a player Id
+        var playerId = Guid.NewGuid();
+
+        // And I have created a new game
+
+        // When the mouse ends a day
+
+        // Then the game should be in progress
+    }
+    
+    [Fact]
+    public async Task WinAGame()
+    {  
+        var client = _factory.CreateClient();
+
+        // Given I have a player Id
+        var playerId = Guid.NewGuid();
+
+        // And I have created a new game
+
+        // When the mouse ends 7 days
+
+        // Then the game should be Won
+    }
+    
+    [Fact]
+    public async Task LoseAGame()
+    {  
+        var client = _factory.CreateClient();
+
+        // Given I have a player Id
+        var playerId = Guid.NewGuid();
+
+        // And I have created a new game
+
+        // When the mouse dies
+
+        // Then the game should be Lost
     }
 }

@@ -9,13 +9,13 @@ namespace game_domain_api.GameContext
         readonly IEventPub eventBroker = eventBroker;
         readonly IGameDataRepository gameDataRepository = gameDataRepository;
 
-        public bool IsGameRunning => loadedGame?.GameState == GameStates.Playing;
+        public bool IsGameRunning => loadedGame?.GameState == GameStates.Started;
 
         public Guid CurrentPlayerId => loadedGame?.PlayerId ?? Guid.Empty;
 
         public async Task New(Guid playerId)
         {
-            loadedGame = new Game(new GameData { Id = Guid.NewGuid(), GameState = GameStates.Playing, PlayerId = playerId });
+            loadedGame = new Game(new GameData { Id = Guid.NewGuid(), GameState = GameStates.Started, PlayerId = playerId });
             await gameDataRepository.AddAsync(loadedGame.AsData());
             eventBroker.Publish(new NewGameStartedEvent(LionStates.Sleeping));
         }

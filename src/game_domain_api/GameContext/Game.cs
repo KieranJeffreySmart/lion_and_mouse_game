@@ -70,7 +70,8 @@ namespace game_domain_api.GameContext
     public enum GameStates
     {
         Unknown = 0,
-        Playing,
+        Started,
+        InProgress,
         Lost,
         Won        
     }
